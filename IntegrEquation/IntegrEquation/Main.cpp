@@ -73,6 +73,8 @@ Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 	//Vect T = InitVect(t.size);
 	//T = EnterZero(T);
 
+	double hHalf = h / 2;
+
 	Vect T = InitZeroVect(t.size);
 
 	for (int k = 0; k < T.size; k++)
@@ -80,16 +82,20 @@ Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 		double temp = 0;
 		for (int i = 0; i < T.size; i++)
 		{
-			temp = K(t.V[i], s.V[0], x.V[0]) * h / 2;
-			for (int j = 1; j < T.size - 1; j++)
-				temp += h * K(t.V[i], s.V[j], x.V[j]);
-			temp += K(t.V[i], s.V[s.size - 1], x.V[x.size - 1]) * h / 2;
-			temp = temp - y.V[i];
+			temp = K(t.V[i], s.V[0], x.V[0]) * hHalf;
 
-			if ((k == 0) || (k == T.size - 1))
-				temp = temp * dK_dx(t.V[i], s.V[k], x.V[k]) * h;
-			else
-				temp = 2 * temp * dK_dx(t.V[i], s.V[k], x.V[k]) * h;
+			int tmpSizeIncr = T.size - 1;
+			for (int j = 1; j < tmpSizeIncr; j++)
+			{
+				temp += h * K(t.V[i], s.V[j], x.V[j]);
+			}
+			temp += K(t.V[i], s.V[s.size - 1], x.V[x.size - 1]) * hHalf;
+			temp = temp - y.V[i];
+			
+			temp = temp * dK_dx(t.V[i], s.V[k], x.V[k]) * h;
+
+			if ((k != 0) && (k != tmpSizeIncr))
+				temp = temp * 2;
 		}
 		T.V[k] = temp;
 	}
@@ -158,7 +164,7 @@ int main()
 		cout << "!!!! Nevyazka - " << nev << "\n\n";
 		step++;
 		cout << "runtime = " << clock() / 1000.0 << endl;
-		_getch();
+		//_getch();
 	} while (nev > eps);
 	Print(x);
 	cout << "runtime = " << clock() / 1000.0 << endl;
