@@ -13,7 +13,7 @@ int a = 0;
 int b = 1;
 double eps = 0.0005;
 
-double yTemp = 7.0 / 3;
+double yTemp = 5.0 / 3;
 
 Vect operator *(Matr A, Vect b)
 {
@@ -50,14 +50,14 @@ double F(Vect t, Vect s, Vect x, Vect y, double h)
 
 	double hHalf = h / 2;
 
-	for (int i = 0; i < t.size; i++)
+	for (int i = 0; i < t.size; i++)//ускоряем с помощью силк фор
 	{
 		double temp = K(t.V[i], s.V[0], x.V[0]) * hHalf;
 		for (int j = 1; j < t.size - 1; j++)
 			temp += h * K(t.V[i], s.V[j], x.V[j]);
 		temp += K(t.V[i], s.V[s.size - 1], x.V[x.size - 1]) * hHalf;
-
 		double tmpForPow = temp - y.V[i];
+		
 		T += tmpForPow * tmpForPow;
 	}
 	return T;
@@ -105,7 +105,7 @@ Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 
 double mingrad(Vect t, Vect s, Vect x, Vect y, Vect g, double hh)
 {
-	double l = 0.0000001;
+	double l = 0.00001;
 	double h = l;
 	Vect x1 = InitVect(x.size);
 	Vect x2 = InitVect(x.size);
@@ -114,10 +114,10 @@ double mingrad(Vect t, Vect s, Vect x, Vect y, Vect g, double hh)
 		x1.V[i] = x.V[i];
 		x2.V[i] = x.V[i] - h * g.V[i];
 	}
-	while (F(t, s, x1, y, hh) > F(t, s, x2, y, hh))
+	while (F(t, s, x1, y, hh) > F(t, s, x2, y, hh)) //необходимо выпонять вычисление функций параллельно
 	{
 		l += h;
-		for (int i = 0; i < x.size; i++)
+		for (int i = 0; i < x.size; i++) //ускоряем с помощью силк фор
 		{
 			x1.V[i] = x2.V[i];
 			x2.V[i] = x1.V[i] - h * g.V[i];
@@ -153,9 +153,10 @@ int main()
 	{
 		//Print(x);
 		//Print(f);
-		lambda = mingrad(t, s, x, f, grad(t, s, x, f, h), h);
+		Vect g = grad(t, s, x, f, h);
+		lambda = mingrad(t, s, x, f, g, h); //Выполняется очень долго
 		cout << "Lambda ---- " << lambda << endl;
-		dx = lambda * grad(t, s, x, f, h);
+		dx = lambda * g;
 		x = x - dx;
 		//Print(dx);
 		//Print(x);
