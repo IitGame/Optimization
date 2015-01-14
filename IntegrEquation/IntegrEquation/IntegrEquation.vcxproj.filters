@@ -15,19 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\Desktop\IntegrEquation\Matrix.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\Desktop\IntegrEquation\Vect.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
+    <None Include="..\..\..\..\..\Desktop\IntegrEquation\Численное решение интегрального уравнения.doc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\Desktop\IntegrEquation\main.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\..\Desktop\IntegrEquation\Численное решение интегрального уравнения.doc" />
+    <ClInclude Include="Matrix.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

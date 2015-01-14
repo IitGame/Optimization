@@ -76,14 +76,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\Desktop\IntegrEquation\Matrix.h" />
-    <ClInclude Include="..\..\..\..\..\Desktop\IntegrEquation\Vect.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\Desktop\IntegrEquation\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\..\..\..\Desktop\IntegrEquation\Численное решение интегрального уравнения.doc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="Vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
