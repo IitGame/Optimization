@@ -15,6 +15,15 @@ Vect InitVect(int n)
 	return T;
 }
 
+Vect InitZeroVect(int n)
+{
+	Vect T;
+	T.size = n;
+	T.V = new double[n]{0};
+	return T;
+}
+
+
 // Вывод на экран
 void Print(Vect T)
 {
@@ -57,10 +66,10 @@ double Norma(Vect a)
 	double temp = 0;
 	for (int i = 0; i < a.size; i++)
 	{
-		temp += pow(a.V[i], 2.0);
+		temp += a.V[i] * a.V[i];
 	}
 
-	temp = pow(temp, 0.5);
+	temp = sqrt(temp);
 	return temp;
 }
 

@@ -16,8 +16,10 @@ double eps = 0.0005;
 Vect operator *(Matr A, Vect b)
 {
 	Vect c;
-	c = InitVect(b.size);
-	c = EnterZero(c);
+	/*c = InitVect(b.size);
+	c = EnterZero(c);*/
+
+	c = InitZeroVect(b.size);
 
 	for (int i = 0; i < b.size; i++)
 	{
@@ -62,8 +64,11 @@ double dK_dx(double t, double s, double x)
 
 Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 {
-	Vect T = InitVect(t.size);
-	T = EnterZero(T);
+	//Vect T = InitVect(t.size);
+	//T = EnterZero(T);
+
+	Vect T = InitZeroVect(t.size);
+
 	for (int k = 0; k < T.size; k++)
 	{
 		double temp = 0;
@@ -130,22 +135,23 @@ int main()
 	int step = 0;
 	Vect dx = InitVect(N);
 	double nev = 0;
-	Print(t);
+	//Print(t);
 	do
 	{
-		Print(x);
+		//Print(x);
 		//Print(f);
 		lambda = mingrad(t, s, x, f, grad(t, s, x, f, h), h);
 		cout << "Lambda ---- " << lambda << endl;
 		dx = lambda * grad(t, s, x, f, h);
 		x = x - dx;
-		Print(dx);
-		Print(x);
+		//Print(dx);
+		//Print(x);
 		nev = F(t, s, x, f, h);
 		//nev = Norma(dx);
 		cout << "!!!! Nevyazka - " << nev << "\n\n";
 		step++;
-		//_getch();
+		cout << "runtime = " << clock() / 1000.0 << endl;
+		_getch();
 	} while (nev > eps);
 	Print(x);
 	cout << "runtime = " << clock() / 1000.0 << endl;

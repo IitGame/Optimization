@@ -4,7 +4,7 @@
 double Abs(double t)
 {
 	if (t < 0) return -t;
-	else return t;
+	return t;
 }
 
 
@@ -27,6 +27,19 @@ Matr InitMatr(int n, int m)
 		temp.M[i] = new double[m];
 	}
 
+	return temp;
+}
+
+Matr InitZeroMatr(int n, int m)
+{
+	Matr temp;
+	temp.M = new double*[n];
+	temp.row = n;
+	temp.col = m;
+	for (int i = 0; i < temp.row; i++)
+	{
+		temp.M[i] = new double[m]{0};
+	}
 	return temp;
 }
 
@@ -102,8 +115,8 @@ void MatrToFile(char *Name, Matr A, int steprow = 1, int stepcol = 1)
 Matr operator -(Matr A, Matr B)
 {
 	for (int i = 0; i < A.row; i++)
-	for (int j = 0; j < A.col; j++)
-		A.M[i][j] -= B.M[i][j];
+		for (int j = 0; j < A.col; j++)
+			A.M[i][j] -= B.M[i][j];
 
 	return A;
 }
@@ -112,8 +125,8 @@ Matr operator -(Matr A, Matr B)
 Matr operator +(Matr A, Matr B)
 {
 	for (int i = 0; i < A.row; i++)
-	for (int j = 0; j < A.col; j++)
-		A.M[i][j] += B.M[i][j];
+		for (int j = 0; j < A.col; j++)
+			A.M[i][j] += B.M[i][j];
 
 	return A;
 }
@@ -122,13 +135,15 @@ Matr operator +(Matr A, Matr B)
 Matr operator *(Matr A, Matr B)
 {
 	Matr C;
-	C = InitMatr(A.row, B.col);
-	C = EnterZero(C);
+	/*C = InitMatr(A.row, B.col);
+	C = EnterZero(C);*/
+	C = InitZeroMatr(A.row, B.col);
+
 
 	for (int i = 0; i < A.row; i++)
-	for (int j = 0; j < B.col; j++)
-	for (int l = 0; l < A.col; l++)
-		C.M[i][j] += A.M[i][l] * B.M[l][j];
+		for (int j = 0; j < B.col; j++)
+			for (int l = 0; l < A.col; l++)
+				C.M[i][j] += A.M[i][l] * B.M[l][j];
 
 	return C;
 }
@@ -137,12 +152,14 @@ Matr operator *(Matr A, Matr B)
 Matr operator * (double a, Matr B)
 {
 	Matr C;
-	C = InitMatr(B.row, B.col);
-	C = EnterZero(C);
+	//C = InitMatr(B.row, B.col);
+	//C = EnterZero(C);
+
+	C = InitZeroMatr(B.row, B.col);
 
 	for (int i = 0; i < B.row; i++)
-	for (int j = 0; j < B.col; j++)
-		C.M[i][j] = B.M[i][j] * a;
+		for (int j = 0; j < B.col; j++)
+			C.M[i][j] = B.M[i][j] * a;
 
 	return C;
 }
@@ -151,8 +168,10 @@ Matr operator * (double a, Matr B)
 Matr Minor(Matr A, int row, int col)
 {
 	Matr T;
-	T = InitMatr(A.row - 1, A.col - 1);
-	T = EnterZero(T);
+	//T = InitMatr(A.row - 1, A.col - 1);
+	//T = EnterZero(T);
+
+	T = InitZeroMatr(A.row - 1, A.col - 1);
 
 	for (int i = 0; i < row; i++)
 	{
@@ -183,33 +202,33 @@ double Determ(Matr A)
 		det = A.M[0][0] * A.M[1][1] - A.M[0][1] * A.M[1][0];
 		return det;
 	}
-	else
+	for (int i = 0; i < A.row - 1; i += 2)
+		det += A.M[0][i] * Determ(Minor(A, 0, i)) - A.M[0][i + 1] * Determ(Minor(A, 0, i + 1));
+
+	if (A.row % 2 != 0)
 	{
-		for (int i = 0; i < A.row - 1; i += 2)
-			det += A.M[0][i] * Determ(Minor(A, 0, i)) - A.M[0][i + 1] * Determ(Minor(A, 0, i + 1));
-
-		if (A.row % 2 == 1)
-		{
-			det += A.M[0][A.row - 1] * Determ(Minor(A, 0, A.row - 1));
-		}
-
-		return det;
+		det += A.M[0][A.row - 1] * Determ(Minor(A, 0, A.row - 1));
 	}
+
+	return det;
 }
 
 
 // Обратная матрица
 Matr InversMatr(Matr A)
 {
-	Matr T;
-	T = InitMatr(A.row, A.col);
-	T = EnterUnit(T);
-
 	if (Determ(A) == 0)
 	{
+		Matr T;
+		T = InitMatr(A.row, A.col);
+		T = EnterUnit(T);
 		printf("Inverse Matrix not Found!!!!\n");
 		return T;
 	}
+
+	Matr T;
+	T = InitMatr(A.row, A.col);
+	T = EnterUnit(T);
 
 	// Ищем обратную матрицу методом исключения
 	printf("\n Forward________ \n");
@@ -219,11 +238,11 @@ Matr InversMatr(Matr A)
 		int number = i;
 		// Для каждого столбца ищем главный элемент
 		for (int j = i + 1; j < A.row; j++)
-		if (Abs(A.M[j][i]) > max)
-		{
-			max = Abs(A.M[j][i]);
-			number = j;
-		}
+			if (Abs(A.M[j][i]) > max)
+			{
+				max = Abs(A.M[j][i]);
+				number = j;
+			}
 
 		// Меняем эту строку местами со строкой i
 		if (number > i)
