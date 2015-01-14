@@ -13,6 +13,8 @@ int a = 0;
 int b = 1;
 double eps = 0.0005;
 
+double yTemp = 7.0 / 3;
+
 Vect operator *(Matr A, Vect b)
 {
 	Vect c;
@@ -33,7 +35,7 @@ Vect operator *(Matr A, Vect b)
 
 double y(double t)
 {
-	return t + 7.0 / 3;
+	return t + yTemp;
 }
 
 double K(double t, double s, double x)
@@ -46,13 +48,17 @@ double F(Vect t, Vect s, Vect x, Vect y, double h)
 {
 	double T = 0;
 
+	double hHalf = h / 2;
+
 	for (int i = 0; i < t.size; i++)
 	{
-		double temp = K(t.V[i], s.V[0], x.V[0]) * h / 2;
+		double temp = K(t.V[i], s.V[0], x.V[0]) * hHalf;
 		for (int j = 1; j < t.size - 1; j++)
 			temp += h * K(t.V[i], s.V[j], x.V[j]);
-		temp += K(t.V[i], s.V[s.size - 1], x.V[x.size - 1]) * h / 2;
-		T += (temp - y.V[i]) * (temp - y.V[i]);
+		temp += K(t.V[i], s.V[s.size - 1], x.V[x.size - 1]) * hHalf;
+
+		double tmpForPow = temp - y.V[i];
+		T += tmpForPow * tmpForPow;
 	}
 	return T;
 }
@@ -81,7 +87,7 @@ Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 			temp = temp - y.V[i];
 
 			if ((k == 0) || (k == T.size - 1))
-				temp = 2 * temp * dK_dx(t.V[i], s.V[k], x.V[k]) * h / 2;
+				temp = temp * dK_dx(t.V[i], s.V[k], x.V[k]) * h;
 			else
 				temp = 2 * temp * dK_dx(t.V[i], s.V[k], x.V[k]) * h;
 		}
@@ -127,10 +133,11 @@ int main()
 	Vect x = InitVect(N);
 	for (int i = 0; i < N; i++)
 	{
-		t.V[i] = i * h;
-		s.V[i] = i * h;
-		f.V[i] = y(i * h);
-		x.V[i] = y(i * h);
+		double ih = i*h;
+		t.V[i] = ih;
+		s.V[i] = ih;
+		f.V[i] = y(ih);
+		x.V[i] = y(ih);
 	}
 	int step = 0;
 	Vect dx = InitVect(N);
