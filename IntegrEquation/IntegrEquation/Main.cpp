@@ -6,6 +6,7 @@
 #include "Matrix.h"
 #include "Vector.h"
 #include <ctime>    
+#include <cilk\cilk.h>
 
 using namespace std;
 
@@ -14,6 +15,8 @@ int b = 1;
 double eps = 0.0005;
 
 double yTemp = 5.0 / 3;
+
+double f1, f2;//переменные для вывода в них результатов вычисления F
 
 Vect operator *(Matr A, Vect b)
 {
@@ -50,6 +53,7 @@ double F(Vect t, Vect s, Vect x, Vect y, double h)
 
 	double hHalf = h / 2;
 
+	#pragma simd
 	for (int i = 0; i < t.size; i++)//ускоряем с помощью силк фор
 	{
 		double temp = K(t.V[i], s.V[0], x.V[0]) * hHalf;
@@ -57,7 +61,7 @@ double F(Vect t, Vect s, Vect x, Vect y, double h)
 			temp += h * K(t.V[i], s.V[j], x.V[j]);
 		temp += K(t.V[i], s.V[s.size - 1], x.V[x.size - 1]) * hHalf;
 		double tmpForPow = temp - y.V[i];
-		
+
 		T += tmpForPow * tmpForPow;
 	}
 	return T;
@@ -91,7 +95,7 @@ Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 			}
 			temp += K(t.V[i], s.V[s.size - 1], x.V[x.size - 1]) * hHalf;
 			temp = temp - y.V[i];
-			
+
 			temp = temp * dK_dx(t.V[i], s.V[k], x.V[k]) * h;
 
 			if ((k != 0) && (k != tmpSizeIncr))
@@ -102,6 +106,16 @@ Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 	return T;
 }
 
+
+void callF1(Vect t, Vect s, Vect x1, Vect y, double hh)
+{
+	f1 = F(t, s, x1, y, hh);
+}
+
+void callF2(Vect t, Vect s, Vect x2, Vect y, double hh)
+{
+	f2 = F(t, s, x2, y, hh);
+}
 
 double mingrad(Vect t, Vect s, Vect x, Vect y, Vect g, double hh)
 {
@@ -114,7 +128,12 @@ double mingrad(Vect t, Vect s, Vect x, Vect y, Vect g, double hh)
 		x1.V[i] = x.V[i];
 		x2.V[i] = x.V[i] - h * g.V[i];
 	}
-	while (F(t, s, x1, y, hh) > F(t, s, x2, y, hh)) //необходимо выпонять вычисление функций параллельно
+
+	cilk_spawn callF1(t, s, x1, y, hh);
+	callF2(t, s, x2, y, hh);
+
+	cilk_sync;
+	while (f1>f2)//F(t, s, x1, y, hh) > F(t, s, x2, y, hh)) //необходимо выпонять вычисление функций параллельно
 	{
 		l += h;
 		for (int i = 0; i < x.size; i++) //ускоряем с помощью силк фор
@@ -122,6 +141,10 @@ double mingrad(Vect t, Vect s, Vect x, Vect y, Vect g, double hh)
 			x1.V[i] = x2.V[i];
 			x2.V[i] = x1.V[i] - h * g.V[i];
 		}
+		cilk_spawn callF1(t, s, x1, y, hh);
+		callF2(t, s, x2, y, hh);
+
+		cilk_sync;
 	}
 	return l;
 }
