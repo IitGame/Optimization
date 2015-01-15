@@ -53,7 +53,6 @@ double F(Vect t, Vect s, Vect x, Vect y, double h)
 
 	double hHalf = h / 2;
 
-	#pragma simd
 	for (int i = 0; i < t.size; i++)//ускоряем с помощью силк фор
 	{
 		double temp = K(t.V[i], s.V[0], x.V[0]) * hHalf;
@@ -81,9 +80,11 @@ Vect grad(Vect t, Vect s, Vect x, Vect y, double h)
 
 	Vect T = InitZeroVect(t.size);
 
+
 	for (int k = 0; k < T.size; k++)
 	{
 		double temp = 0;
+
 		for (int i = 0; i < T.size; i++)
 		{
 			temp = K(t.V[i], s.V[0], x.V[0]) * hHalf;
@@ -123,24 +124,32 @@ double mingrad(Vect t, Vect s, Vect x, Vect y, Vect g, double hh)
 	double h = l;
 	Vect x1 = InitVect(x.size);
 	Vect x2 = InitVect(x.size);
-	for (int i = 0; i < x.size; i++)
+	int i = x.size - 1;
+	while (i>0)
 	{
-		x1.V[i] = x.V[i];
-		x2.V[i] = x.V[i] - h * g.V[i];
+		//for (int i = 0; i < x.size; i++)
+		{
+			x1.V[i] = x.V[i];
+			x2.V[i] = x.V[i] - h * g.V[i];
+		}
+		i--;
 	}
 
 	cilk_spawn callF1(t, s, x1, y, hh);
 	callF2(t, s, x2, y, hh);
 
 	cilk_sync;
-	while (f1>f2)//F(t, s, x1, y, hh) > F(t, s, x2, y, hh)) //необходимо выпонять вычисление функций параллельно
+	while (f1 > f2)//F(t, s, x1, y, hh) > F(t, s, x2, y, hh)) //необходимо выпонять вычисление функций параллельно
 	{
 		l += h;
-		for (int i = 0; i < x.size; i++) //ускоряем с помощью силк фор
-		{
-			x1.V[i] = x2.V[i];
-			x2.V[i] = x1.V[i] - h * g.V[i];
-		}
+		x1.V[0:x.size] = x2.V[0:x.size];
+		x2.V[0:x.size] = x1.V[0:x.size] - h * g.V[0:x.size];
+
+		//for (int i = 0; i < x.size; i++) //ускоряем с помощью силк фор
+		//{
+		//	x1.V[i] = x2.V[i];
+		//	x2.V[i] = x1.V[i] - h * g.V[i];
+		//}
 		cilk_spawn callF1(t, s, x1, y, hh);
 		callF2(t, s, x2, y, hh);
 
